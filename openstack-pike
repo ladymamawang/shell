@@ -1,0 +1,41 @@
+yum install centos-release-openstack-pike -y && \
+yum install mariadb mariadb-server python2-PyMySQL -y && \
+systemctl start mariadb && systemctl enable mariadb && \
+mysql_secure_installation #初始化数据库  && \
+mysql -uroot -proot123 -e "create database keystone;"
+mysql -uroot -proot123 -e "create database nova;"
+mysql -uroot -proot123 -e "create database glance;"
+mysql -uroot -proot123 -e "create database neutron;"
+mysql -uroot -proot123 -e "create database cinder;"
+mysql -uroot -proot123 -e "create database nova_api;"
+mysql -uroot -proot123 -e "grant all on nova.* to 'nova'@'localhost' identified by 'nova'";
+mysql -uroot -proot123 -e "grant all on nova.* to 'nova'@'%' identified by 'nova'";
+mysql -uroot -proot123 -e "grant all on nova_api.* to 'nova'@'localhost' identified by 'nova'";
+mysql -uroot -proot123 -e "grant all on nova_api.* to 'nova'@'%' identified by 'nova'";
+mysql -uroot -proot123 -e "grant all on keystone.* to 'keystone'@'%' identified by 'keystone'";
+mysql -uroot -proot123 -e "grant all on keystone.* to 'keystone'@'localhost' identified by 'keystone'";
+mysql -uroot -proot123 -e "grant all on glance.* to 'glance'@'%' identified by 'glance'";
+mysql -uroot -proot123 -e "grant all on glance.* to 'glance'@'localhost' identified by 'glance'";
+mysql -uroot -proot123 -e "grant all on neutron.* to 'neutron'@'%' identified by 'neutron'";
+mysql -uroot -proot123 -e "grant all on neutron.* to 'neutron'@'localhost' identified by 'neutron'";
+mysql -uroot -proot123 -e "grant all on cinder.* to 'cinder'@'localhost' identified by 'cinder'";
+mysql -uroot -proot123 -e "grant all on cinder.* to 'cinder'@'%' identified by 'cinder'";
+#####安装RabbitMQ
+yum install -y rabbitmq-server && \
+systemctl start rabbitmq-server && \
+systemctl enable rabbitmq-server && \
+rabbitmqctl add_user openstack openstck 
+rabbimqctl set_permissions openstack ".*" ".*" ".*"
+##########安装keystone
+ yum install -y openstack-keystone httpd mod_wsgi memcached python-memcached && \
+ yum install python-openstackclient openstack-selinux -y && \
+ yum install -y openstack-glance && \
+ yum install -y openstack-nova-api openstack-nova-placement-api  \
+ openstack-nova-conductor openstack-nova-console  \
+ openstack-nova-novncproxy openstack-nova-scheduler  && \
+ yum install -y openstack-neutron openstack-neutron-ml2 \
+ openstack-neutron-linuxbridge ebtables  && \
+systemctl stop firewalld.service  && \
+systemctl disable firewalld.service  && \
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config && \
+setenforce 0 
